@@ -69,7 +69,7 @@ source(here::here("_common.R"))
 
 ```{r}
 #| echo: false
-meta <- readxl::read_xlsx("../metadata.xlsx")
+meta <- readxl::read_xlsx(here::here("indicators", "NO_SLIT_001-004", "metadata.xlsx"))
 st <- meta |>
   filter(Variable == "status") |>
   pull(Value)
@@ -430,9 +430,10 @@ results.ANO.slit[['original']] <- ANO.geo
 st_geometry(results.ANO.slit[['original']]) <- NULL
 results.ANO.slit[['original']]
 # add columns for the indicator
+# these are perhaps obsolete...
 results.ANO.slit[['original']][,'tk'] <- NA
 results.ANO.slit[['original']][,'se'] <- NA
-results.ANO.slit[['original']][,'erosion'] <- NA
+# make numeric
 results.ANO.slit[['original']][,'tk'] <-  as.numeric(results.ANO.slit[['original']][,'tk'])
 results.ANO.slit[['original']][,'se'] <- as.numeric(results.ANO.slit[['original']][,'se'])
 results.ANO.slit[['original']][,'erosion'] <- as.numeric(results.ANO.slit[['original']][,'erosion'])
@@ -451,7 +452,8 @@ results.ANO.slit[['scaled']] <- results.ANO.slit[['original']]
 
 ```
 
-```{r, eval = F, echo = T, warning = F}
+```{r, echo = T, warning = F}
+#| eval: false
 
 # calculating scaled values for the indicators based on the dataset
 for (i in 1:nrow(ANO.geo) ) {
@@ -496,12 +498,12 @@ st_geometry(res.ANO.slit) <- st_geometry(ANO.geo)
 nor <- st_read(here::here("indicators/NO_SLIT_001-004/data/outlineOfNorway_EPSG25833.shp"),
                quiet = T)%>%
   st_as_sf() %>%
-  st_transform(crs = crs(ANO.geo))
+  st_transform(crs = st_crs(ANO.geo))
 
 reg <- st_read(here::here("indicators/NO_SLIT_001-004/data/regions.shp"),
                quiet = T) %>%
   st_as_sf() %>%
-  st_transform(crs = crs(ANO.geo))
+  st_transform(crs = st_crs(ANO.geo))
 
 # change region names to something R-friendly
 # reg$region
@@ -872,11 +874,13 @@ bind_rows(
 ) |>
   kbl()
 ```
+
 The summary statistics indicate very good condition with respect to this indicator, but since the summary statistics hide all information below 1 here, wen can illustrate the occurrence of condition values below 1 with showing histograms
 
 
 Across all ecosystem types, by period:
 ```{r}
+#| message: false
 # period 2019-2021
 res.ANO.slit %>%
   filter(aar %in% c(2019, 2020, 2021)) %>%
@@ -900,6 +904,7 @@ res.ANO.slit %>%
 
 By ecosystem type (across both reporting periods):
 ```{r}
+#| message: false
 # mountains
 res.ANO.slit %>%
   filter(hovedoekosystem_250m2=='fjell' | hovedoekosystem_rute=='Mountain') %>%
